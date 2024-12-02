@@ -16,6 +16,15 @@ const PORT = process.env.PORT || 5000;
 // Serve static files from the 'uploads' folder
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Allow only the frontend domain to make requests
+const corsOptions = {
+  origin: 'https://dashmeafrica-frontend.onrender.com', // Replace this with your frontend URL
+  methods: ['GET', 'POST'], // Allow necessary HTTP methods
+  allowedHeaders: ['Content-Type', 'Authorization'], // Allow headers as needed
+};
+
+app.use(cors(corsOptions));
+
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB connected'))
