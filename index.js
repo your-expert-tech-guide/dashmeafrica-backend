@@ -17,7 +17,7 @@ const PORT = process.env.PORT || 5000;
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const allowedOrigins = [
-  'https://dashmeafrica-frontend.onrender.com', // Production frontend
+  'https://dashmeafrica-frontend.vercel.app', // Production frontend
   'http://localhost:5173', // Local frontend
 ];
 
