@@ -4,12 +4,13 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const path = require('path');
 
+const productRoutes = require('./routes/productRoutes');
+
+
 dotenv.config();
 
 const app = express();
-
 app.use(express.json());
-app.use(cors());
 
 const PORT = process.env.PORT || 5000;
 
@@ -39,7 +40,6 @@ app.get('/', (req, res) => {
 
 
 
-const productRoutes = require('./routes/productRoutes');
 
 // Use the product routes
 app.use('/api/products', productRoutes);
