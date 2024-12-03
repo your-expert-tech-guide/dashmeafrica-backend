@@ -28,7 +28,6 @@ const productSchema = mongoose.Schema(
     },
     tag: {
       type: String,
-      default: "sell", // Default value for items created through this route
     },
   },
   {
