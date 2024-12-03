@@ -1,56 +1,3 @@
-// const express = require('express');
-// const router = express.Router();
-// const Product = require('../models/Product');
-// const multer = require('multer');
-
-// const storage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     cb(null, './uploads/');
-//   },
-//   filename: (req, file, cb) => {
-//     cb(null, file.originalname);
-//   },
-// });
-
-// const upload = multer({ storage: storage });
-
-// // // @desc Create a new product
-// // // @route POST /api/products
-// // // @access Public
-
-// router.post('/', upload.single('image'), async (req, res) => {
-//   console.log('Form data received:', req.body);
-//   console.log('Uploaded file:', req.file);
-
-//   const { title, description, category, price, priceCategory, location } = req.body;
-//   const image = req.file ? req.file.path : null;
-
-//   if (!title || !category || !price) {
-//     return res.status(400).json({
-//       message: 'Please fill all required fields and provide an image',
-//     });
-//   }
-
-//   try {
-//     const product = new Product({
-//       title,
-//       description,
-//       category,
-//       price,
-//       priceCategory,
-//       image,
-//       location,
-//     });
-
-//     const createdProduct = await product.save();
-//     res.status(201).json(createdProduct);
-//   } catch (error) {
-//     res.status(500).json({ message: 'Server Error', error: error.message });
-//   }
-// });
-
-// module.exports = router;
-
 
 const express = require('express');
 const router = express.Router();
@@ -136,4 +83,19 @@ router.post('/', upload.single('image'), async (req, res) => {
   }
 });
 
+
+// @desc Get all products
+// @route GET /api/products
+// @access Public
+router.get('/', async (req, res) => {
+  try {
+    const products = await Product.find();
+    res.status(200).json(products);
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error', error: error.message });
+  }
+});
+
 module.exports = router;
+
+
