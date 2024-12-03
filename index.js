@@ -18,6 +18,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const allowedOrigins = [
   'https://dashmeafrica-frontend.vercel.app', // Production frontend
+  'https://dashmeafrica-frontend.onrender.com/', // Production frontend
   'http://localhost:5173', // Local frontend
 ];
 
