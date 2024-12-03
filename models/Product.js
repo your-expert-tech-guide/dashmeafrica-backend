@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const productSchema = mongoose.Schema(
   {
-    name: {
+    title: {
       type: String,
       required: true,
     },
@@ -13,9 +13,6 @@ const productSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    subcategory: {
-      type: String, // Optional subcategory field
-    },
     price: {
       type: Number,
       required: true,
@@ -25,15 +22,15 @@ const productSchema = mongoose.Schema(
     },
     image: {
       type: String, // Single image URL instead of an array
-      required: true,
+      required: false,
     },
     location: {
       type: String,
-    },
-    isPremium: {
-      type: Boolean,
-      default: false, // Default value is false
-    },
+    }
+    // isPremium: {
+    //   type: Boolean,
+    //   default: false, // Default value is false
+    // },
   },
   {
     timestamps: true, // Automatically add createdAt and updatedAt fields
