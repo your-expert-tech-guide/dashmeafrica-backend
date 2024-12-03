@@ -18,22 +18,21 @@ const productSchema = mongoose.Schema(
       required: true,
     },
     priceCategory: {
-      type: String, // Optional price category field
+      type: String,
     },
     image: {
-      type: String, // Single image URL instead of an array
-      required: false,
+      type: String,
     },
     location: {
       type: String,
-    }
-    // isPremium: {
-    //   type: Boolean,
-    //   default: false, // Default value is false
-    // },
+    },
+    tag: {
+      type: String,
+      default: "sell", // Default value for items created through this route
+    },
   },
   {
-    timestamps: true, // Automatically add createdAt and updatedAt fields
+    timestamps: true,
   }
 );
 

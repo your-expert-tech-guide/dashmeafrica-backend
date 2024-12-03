@@ -36,15 +36,14 @@ router.post('/', upload.single('image'), async (req, res) => {
     // Upload image to Cloudinary
     let imageUrl = '';
     if (req.file) {
-      // Wrap upload in a promise to handle async correctly
       const uploadPromise = new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
           { resource_type: 'image' },
           (error, result) => {
             if (error) {
-              reject(error); // Reject the promise if there's an error
+              reject(error);
             }
-            resolve(result); // Resolve with the result if successful
+            resolve(result);
           }
         );
 
@@ -52,15 +51,13 @@ router.post('/', upload.single('image'), async (req, res) => {
       });
 
       try {
-        const result = await uploadPromise; // Await the promise to get the result
-        imageUrl = result.secure_url; // Get the secure URL from Cloudinary
+        const result = await uploadPromise;
+        imageUrl = result.secure_url;
       } catch (error) {
-        console.error(error);  // Logs the entire error object for better insight
+        console.error(error);
         return res.status(500).json({ message: 'Image upload failed', error: error.message });
-
       }
     }
-
 
     const product = new Product({
       title,
@@ -68,20 +65,23 @@ router.post('/', upload.single('image'), async (req, res) => {
       category,
       price,
       priceCategory,
-      image: imageUrl, // Save the Cloudinary image URL
+      image: imageUrl,
       location,
+      tag: "sell", // Explicitly set the tag to "sell"
     });
+
+    console.log('Product data to be saved:', product); // Debug log
 
     const createdProduct = await product.save();
     if (!createdProduct) {
       return res.status(500).json({ message: 'Failed to create product' });
     }
     res.status(201).json(createdProduct);
-
   } catch (error) {
     res.status(500).json({ message: 'Server Error', error: error.message });
   }
 });
+
 
 
 // @desc Get all products
