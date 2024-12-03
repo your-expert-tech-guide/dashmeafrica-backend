@@ -36,11 +36,6 @@ app.get('/', (req, res) => {
   res.send('API is running...');
 });
 
-
-
-
-
-
 // Use the product routes
 app.use('/api/products', productRoutes);
 
