@@ -5,6 +5,7 @@ const cors = require('cors');
 const path = require('path');
 
 const productRoutes = require('./routes/productRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 dotenv.config();
 
@@ -53,6 +54,10 @@ app.get('/', (req, res) => {
 
 // Register Routes
 app.use('/api/products', productRoutes);
+
+// Register the user route
+app.use('/api/users', userRoutes);
+
 
 // Error Handling Middleware
 app.use((err, req, res, next) => {
