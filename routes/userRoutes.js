@@ -1,6 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
+const jwt = require('jsonwebtoken');
+
+// Generate a JWT
+const generateToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+};
 
 // @desc Register a new user
 // @route POST /api/users/register
@@ -23,10 +29,70 @@ router.post('/register', async (req, res) => {
       throw new Error('User registration failed');
     }
 
-    res.status(201).json({ message: 'User registered successfully' });
+    // res.status(201).json({ message: 'User registered successfully' });
+    // Return token
+    res.status(201).json({
+        _id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        token: generateToken(newUser._id),
+      });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
+
+// @desc Authenticate user
+// @route POST /api/users/login
+// router.post('/login', async (req, res) => {
+//     const { email, password } = req.body;
+  
+//     if (!email || !password) {
+//       return res.status(400).json({ message: 'Please provide email and password' });
+//     }
+  
+//     try {
+//       const user = await User.findOne({ email });
+//       if (!user || !(await bcrypt.compare(password, user.password))) {
+//         return res.status(401).json({ message: 'Invalid email or password' });
+//       }
+  
+//       res.json({
+//         _id: user._id,
+//         name: user.name,
+//         email: user.email,
+//         token: generateToken(user._id),
+//       });
+//     } catch (error) {
+//       res.status(500).json({ message: error.message });
+//     }
+//   });
+router.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+  
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Please provide email and password' });
+    }
+  
+    try {
+      const user = await User.findOne({ email });
+  
+      // Check if user exists and compare passwords
+      if (!user || !(await bcrypt.compare(password, user.password))) {
+        return res.status(401).json({ message: 'Invalid email or password' });
+      }
+  
+      // Return token if login is successful
+      res.json({
+        _id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        token: generateToken(user._id),
+      });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
 
 module.exports = router;

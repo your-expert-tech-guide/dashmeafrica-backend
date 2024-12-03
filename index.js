@@ -6,6 +6,7 @@ const path = require('path');
 
 const productRoutes = require('./routes/productRoutes');
 const userRoutes = require('./routes/userRoutes');
+const userProfileRoutes = require('./routes/userProfileRoutes');
 
 dotenv.config();
 
@@ -57,6 +58,10 @@ app.use('/api/products', productRoutes);
 
 // Register the user route
 app.use('/api/users', userRoutes);
+
+// Register the user route
+app.use('/api/userProfile', userProfileRoutes);
+
 
 
 // Error Handling Middleware
