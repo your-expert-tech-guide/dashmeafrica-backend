@@ -55,7 +55,7 @@ router.delete('/:id', protectAdmin, async (req, res) => {
 // @desc Update a product
 // @route PUT /api/admin/products/:id
 // @access Private (Admin)
-router.put('update/:id', protectAdmin, async (req, res) => {
+router.put('/:id', protectAdmin, async (req, res) => {
   const { title, description, category, price, priceCategory, location, tag } = req.body;
 
   console.log(req.body)
