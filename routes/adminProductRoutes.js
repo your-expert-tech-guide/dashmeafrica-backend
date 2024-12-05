@@ -2,6 +2,19 @@ const express = require('express');
 const router = express.Router();
 const Product = require('../models/Product');
 const { protectAdmin } = require('../middleware/adminMiddleware');
+const multer = require('multer');
+const cloudinary = require('cloudinary').v2;
+
+// Cloudinary Configuration (Make sure your .env file is set up)
+cloudinary.config({
+  cloud_name: "df2q6gyuq",
+  api_key: "259936754944698",
+  api_secret: "bTfV4_taJPd1zxxk1KJADTL8JdU",
+});
+
+// Multer memory storage (since we're uploading to Cloudinary)
+const storage = multer.memoryStorage(); // Store file in memory
+const upload = multer({ storage: storage });
 
 // @desc Get all products
 // @route GET /api/admin/products
@@ -55,10 +68,49 @@ router.delete('/:id', protectAdmin, async (req, res) => {
 // @desc Update a product
 // @route PUT /api/admin/products/:id
 // @access Private (Admin)
-router.put('/:id', protectAdmin, async (req, res) => {
-  const { title, description, category, price, priceCategory, location, tag } = req.body;
+// router.put('/:id', upload.single('image'), async (req, res) => {
+//   console.log('Form data received:', req.body);
+//   console.log('Uploaded file:', req.file);
 
-  console.log(req.body)
+//   const { title, description, category, price, priceCategory, location, tag } = req.body;
+
+//   try {
+//     const product = await Product.findById(req.params.id);
+//     if (!product) {
+//       return res.status(404).json({ message: 'Product not found' });
+//     }
+
+//     // Update fields if provided
+//     product.title = title || product.title;
+//     product.description = description || product.description;
+//     product.category = category || product.category;
+//     product.location = location || product.location;
+//     product.tag = tag || product.tag;
+
+//     // Only update price and priceCategory if the tag is not 'donate'
+//     if (tag !== 'donate') {
+//       if (price !== undefined) product.price = price;
+//       if (priceCategory !== undefined) product.priceCategory = priceCategory;
+//     } else {
+//       product.price = undefined;
+//       product.priceCategory = undefined;
+//     }
+
+//     const updatedProduct = await product.save();
+//     res.status(200).json(updatedProduct);
+//   } catch (error) {
+//     console.error('Error updating product:', error.message);
+//     res.status(500).json({ message: 'Failed to update product', error: error.message });
+//   }
+// });
+// @desc Update a product
+// @route PUT /api/admin/products/:id
+// @access Private (Admin)
+router.put('/:id', upload.single('image'), async (req, res) => {
+  console.log('Form data received:', req.body);
+  console.log('Uploaded file:', req.file);
+
+  const { title, description, category, price, priceCategory, location, tag } = req.body;
 
   try {
     const product = await Product.findById(req.params.id);
@@ -82,6 +134,31 @@ router.put('/:id', protectAdmin, async (req, res) => {
       product.priceCategory = undefined;
     }
 
+    // Upload new image to Cloudinary if provided
+    if (req.file) {
+      const uploadPromise = new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { resource_type: 'image' },
+          (error, result) => {
+            if (error) {
+              reject(error);
+            }
+            resolve(result);
+          }
+        );
+
+        require('streamifier').createReadStream(req.file.buffer).pipe(stream);
+      });
+
+      try {
+        const result = await uploadPromise;
+        product.image = result.secure_url; // Update image URL in the product
+      } catch (error) {
+        console.error('Error uploading image:', error.message);
+        return res.status(500).json({ message: 'Image upload failed', error: error.message });
+      }
+    }
+
     const updatedProduct = await product.save();
     res.status(200).json(updatedProduct);
   } catch (error) {
@@ -89,6 +166,7 @@ router.put('/:id', protectAdmin, async (req, res) => {
     res.status(500).json({ message: 'Failed to update product', error: error.message });
   }
 });
+
 
 
 module.exports = router;

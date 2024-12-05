@@ -64,10 +64,7 @@ app.use('/api/products', productRoutes);
 
 // Register the user route
 app.use('/api/users', userRoutes);
-
-// Register the user route
 app.use('/api/userProfile', userProfileRoutes);
-
 app.use('/api/admin', adminRoutes);
 app.use('/api/adminDashboard', adminDashboardRoutes);
 app.use('/api/adminProduct', adminProductRoutes);

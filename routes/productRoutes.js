@@ -155,6 +155,28 @@ router.get('/', async (req, res) => {
   }
 });
 
+// @desc Get a product by ID
+// @route GET /api/products/:id
+// @access Public
+router.get('/:id', async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    res.status(200).json(product);
+  } catch (error) {
+    // If the error is due to an invalid ObjectId
+    if (error.kind === 'ObjectId') {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+    res.status(500).json({ message: 'Server Error', error: error.message });
+  }
+});
+
+
 module.exports = router;
 
 
