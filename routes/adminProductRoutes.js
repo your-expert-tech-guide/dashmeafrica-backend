@@ -22,19 +22,19 @@ router.get('/', protectAdmin, async (req, res) => {
 router.delete('/:id', protectAdmin, async (req, res) => {
     try {
       console.log('Product ID:', req.params.id);  // Log product ID for debugging
-      const product = await Product.findById(req.params.id);
+      const product = await Product.findByIdAndDelete(req.params.id);
       if (!product) {
         return res.status(404).json({ message: 'Product not found' });
       }
-  
-      await product.remove();
+
       console.log('Product deleted:', product);  // Log successful deletion
       res.status(200).json({ message: 'Product deleted successfully' });
     } catch (error) {
       console.error('Error deleting product:', error.message);
       res.status(500).json({ message: 'Failed to delete product', error: error.message });
     }
-  });
+});
+
   
 
 // @desc Update a product
