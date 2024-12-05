@@ -8,6 +8,8 @@ const productRoutes = require('./routes/productRoutes');
 const userRoutes = require('./routes/userRoutes');
 const userProfileRoutes = require('./routes/userProfileRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const adminDashboardRoutes = require('./routes/adminDashboardRoutes');
+const adminProductRoutes = require('./routes/adminProductRoutes');
 
 dotenv.config();
 
@@ -64,6 +66,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/userProfile', userProfileRoutes);
 
 app.use('/api/admin', adminRoutes);
+app.use('/api/adminDashboard', adminDashboardRoutes);
+app.use('/api/adminProduct', adminProductRoutes);
 
 
 // Error Handling Middleware
