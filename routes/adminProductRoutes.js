@@ -55,8 +55,10 @@ router.delete('/:id', protectAdmin, async (req, res) => {
 // @desc Update a product
 // @route PUT /api/admin/products/:id
 // @access Private (Admin)
-router.put('/:id', protectAdmin, async (req, res) => {
+router.put('update/:id', protectAdmin, async (req, res) => {
   const { title, description, category, price, priceCategory, location, tag } = req.body;
+
+  console.log(req.body)
 
   try {
     const product = await Product.findById(req.params.id);
@@ -87,5 +89,6 @@ router.put('/:id', protectAdmin, async (req, res) => {
     res.status(500).json({ message: 'Failed to update product', error: error.message });
   }
 });
+
 
 module.exports = router;
