@@ -227,7 +227,6 @@ router.post('/donate', upload.single('image'), async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const products = await Product.find().populate('uploaderId', 'username email'); // Include username and email from the User model
-    console.log(products)
     res.status(200).json(products);
   } catch (error) {
     res.status(500).json({ message: 'Server Error', error: error.message });
