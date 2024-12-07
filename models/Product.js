@@ -78,7 +78,7 @@ const productSchema = mongoose.Schema(
     tag: {
       type: String,
     },
-    uploader: {
+    uploaderId: {
       type: mongoose.Schema.Types.ObjectId, // Assuming users are stored as ObjectIds
       ref: 'User', // Reference to the User model
       required: true, // Make this mandatory
@@ -92,3 +92,7 @@ const productSchema = mongoose.Schema(
     timestamps: true,
   }
 );
+
+const Product = mongoose.model('Product', productSchema);
+
+module.exports = Product;

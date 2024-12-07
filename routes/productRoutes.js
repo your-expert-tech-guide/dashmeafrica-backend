@@ -86,9 +86,11 @@ router.post('/', upload.single('image'), async (req, res) => {
   console.log('Form data received:', req.body);
   console.log('Uploaded file:', req.file);
 
-  const { title, description, category, price, priceCategory, location, uploader } = req.body;
+  const { title, description, category, price, priceCategory, location, uploaderId } = req.body;
 
-  if (!title || !category || !price || !uploader) {
+  console.log(uploaderId)
+
+  if (!title || !category || !price || !uploaderId) {
     return res.status(400).json({
       message: 'Please fill all required fields, provide an image, and include uploader information',
     });
@@ -130,7 +132,7 @@ router.post('/', upload.single('image'), async (req, res) => {
       image: imageUrl,
       location,
       tag: 'sell', // Explicitly set the tag to "sell"
-      uploader, // Add the uploader ID
+      uploaderId, // Add the uploader ID
       availability: true, // Default to available
     });
 
@@ -211,23 +213,23 @@ router.post('/donate', upload.single('image'), async (req, res) => {
 // @desc Get all products
 // @route GET /api/products
 // @access Public
-// router.get('/', async (req, res) => {
-//   try {
-//     const products = await Product.find();
-//     res.status(200).json(products);
-//   } catch (error) {
-//     res.status(500).json({ message: 'Server Error', error: error.message });
-//   }
-// });
-
 router.get('/', async (req, res) => {
   try {
-    const products = await Product.find().populate('uploader', 'username email'); // Include username and email from the User model
+    const products = await Product.find();
     res.status(200).json(products);
   } catch (error) {
     res.status(500).json({ message: 'Server Error', error: error.message });
   }
 });
+
+// router.get('/', async (req, res) => {
+//   try {
+//     const products = await Product.find().populate('uploaderId', 'username email'); // Include username and email from the User model
+//     res.status(200).json(products);
+//   } catch (error) {
+//     res.status(500).json({ message: 'Server Error', error: error.message });
+//   }
+// });
 
 
 // @desc Get a product by ID
