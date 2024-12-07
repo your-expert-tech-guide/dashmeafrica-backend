@@ -78,7 +78,7 @@ const productSchema = mongoose.Schema(
     tag: {
       type: String,
     },
-    uploaderId: {
+    uploader: {
       type: mongoose.Schema.Types.ObjectId, // Assuming users are stored as ObjectIds
       ref: 'User', // Reference to the User model
       required: true, // Make this mandatory
