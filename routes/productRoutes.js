@@ -153,7 +153,7 @@ router.post('/donate', upload.single('image'), async (req, res) => {
 
   const { title, description, category, location, uploader } = req.body;
 
-  if (!title || !category || !price || !uploader) {
+  if (!title || !category || !location || !uploader) {
     return res.status(400).json({
       message: 'Please fill all required fields, provide an image, and include uploader information',
     });
@@ -269,6 +269,7 @@ router.post('/donate', upload.single('image'), async (req, res) => {
 //     res.status(500).json({ message: 'Server Error', error: error.message });
 //   }
 // });
+
 
 
 
