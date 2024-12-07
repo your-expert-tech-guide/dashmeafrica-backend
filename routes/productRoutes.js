@@ -213,23 +213,23 @@ router.post('/donate', upload.single('image'), async (req, res) => {
 // @desc Get all products
 // @route GET /api/products
 // @access Public
-router.get('/', async (req, res) => {
-  try {
-    const products = await Product.find();
-    res.status(200).json(products);
-  } catch (error) {
-    res.status(500).json({ message: 'Server Error', error: error.message });
-  }
-});
-
 // router.get('/', async (req, res) => {
 //   try {
-//     const products = await Product.find().populate('uploaderId', 'username email'); // Include username and email from the User model
+//     const products = await Product.find();
 //     res.status(200).json(products);
 //   } catch (error) {
 //     res.status(500).json({ message: 'Server Error', error: error.message });
 //   }
 // });
+
+router.get('/', async (req, res) => {
+  try {
+    const products = await Product.find().populate('uploaderId', 'username email'); // Include username and email from the User model
+    res.status(200).json(products);
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error', error: error.message });
+  }
+});
 
 
 // @desc Get a product by ID
