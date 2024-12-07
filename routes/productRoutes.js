@@ -210,6 +210,8 @@ router.post('/donate', upload.single('image'), async (req, res) => {
 });
 
 
+
+
 // @desc Get all products
 // @route GET /api/products
 // @access Public
@@ -225,6 +227,7 @@ router.post('/donate', upload.single('image'), async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const products = await Product.find().populate('uploaderId', 'username email'); // Include username and email from the User model
+    console.log(products)
     res.status(200).json(products);
   } catch (error) {
     res.status(500).json({ message: 'Server Error', error: error.message });
@@ -253,20 +256,20 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.patch('/:id/availability', async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id);
-    if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
-    }
+// router.patch('/:id/availability', async (req, res) => {
+//   try {
+//     const product = await Product.findById(req.params.id);
+//     if (!product) {
+//       return res.status(404).json({ message: 'Product not found' });
+//     }
 
-    product.availability = !product.availability; // Toggle availability
-    const updatedProduct = await product.save();
-    res.status(200).json(updatedProduct);
-  } catch (error) {
-    res.status(500).json({ message: 'Server Error', error: error.message });
-  }
-});
+//     product.availability = !product.availability; // Toggle availability
+//     const updatedProduct = await product.save();
+//     res.status(200).json(updatedProduct);
+//   } catch (error) {
+//     res.status(500).json({ message: 'Server Error', error: error.message });
+//   }
+// });
 
 
 module.exports = router;
