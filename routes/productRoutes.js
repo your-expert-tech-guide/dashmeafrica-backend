@@ -86,11 +86,11 @@ router.post('/', upload.single('image'), async (req, res) => {
   console.log('Form data received:', req.body);
   console.log('Uploaded file:', req.file);
 
-  const { title, description, category, price, priceCategory, location, uploaderId } = req.body;
+  const { title, description, category, price, priceCategory, location, uploader } = req.body;
 
-  console.log(uploaderId)
+  console.log(uploader)
 
-  if (!title || !category || !price || !uploaderId) {
+  if (!title || !category || !price || !uploader) {
     return res.status(400).json({
       message: 'Please fill all required fields, provide an image, and include uploader information',
     });
@@ -132,7 +132,7 @@ router.post('/', upload.single('image'), async (req, res) => {
       image: imageUrl,
       location,
       tag: 'sell', // Explicitly set the tag to "sell"
-      uploaderId, // Add the uploader ID
+      uploader, // Add the uploader ID
       availability: true, // Default to available
     });
 
