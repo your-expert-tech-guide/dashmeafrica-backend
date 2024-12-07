@@ -239,7 +239,7 @@ router.get('/', async (req, res) => {
 // @access Public
 router.get('/:id', async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findById(req.params.id).populate('uploader', 'username email');
 
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
