@@ -147,17 +147,15 @@ router.post('/', upload.single('image'), async (req, res) => {
     res.status(500).json({ message: 'Server Error', error: error.message });
   }
 });
-
-
 router.post('/donate', upload.single('image'), async (req, res) => {
   console.log('Form data received:', req.body);
   console.log('Uploaded file:', req.file);
 
-  const { title, description, category, location } = req.body;
+  const { title, description, category, location, uploader } = req.body;
 
-  if (!title || !category || !location) {
+  if (!title || !category || !price || !uploader) {
     return res.status(400).json({
-      message: 'Please fill all required fields and provide an image',
+      message: 'Please fill all required fields, provide an image, and include uploader information',
     });
   }
 
@@ -194,7 +192,9 @@ router.post('/donate', upload.single('image'), async (req, res) => {
       category,
       image: imageUrl,
       location,
-      tag: "donate", // Explicitly set the tag to "sell"
+      tag: 'donate', 
+      uploader, // Add the uploader ID
+      availability: true, // Default to available
     });
 
     console.log('Product to be donated to be saved:', product); // Debug log
@@ -208,6 +208,67 @@ router.post('/donate', upload.single('image'), async (req, res) => {
     res.status(500).json({ message: 'Server Error', error: error.message });
   }
 });
+
+
+// router.post('/donate', upload.single('image'), async (req, res) => {
+//   console.log('Form data received:', req.body);
+//   console.log('Uploaded file:', req.file);
+
+//   const { title, description, category, location } = req.body;
+
+//   if (!title || !category || !location) {
+//     return res.status(400).json({
+//       message: 'Please fill all required fields and provide an image',
+//     });
+//   }
+
+//   try {
+//     // Upload image to Cloudinary
+//     let imageUrl = '';
+//     if (req.file) {
+//       const uploadPromise = new Promise((resolve, reject) => {
+//         const stream = cloudinary.uploader.upload_stream(
+//           { resource_type: 'image' },
+//           (error, result) => {
+//             if (error) {
+//               reject(error);
+//             }
+//             resolve(result);
+//           }
+//         );
+
+//         require('streamifier').createReadStream(req.file.buffer).pipe(stream);
+//       });
+
+//       try {
+//         const result = await uploadPromise;
+//         imageUrl = result.secure_url;
+//       } catch (error) {
+//         console.error(error);
+//         return res.status(500).json({ message: 'Image upload failed', error: error.message });
+//       }
+//     }
+
+//     const product = new Product({
+//       title,
+//       description,
+//       category,
+//       image: imageUrl,
+//       location,
+//       tag: "donate", // Explicitly set the tag to "sell"
+//     });
+
+//     console.log('Product to be donated to be saved:', product); // Debug log
+
+//     const createdProduct = await product.save();
+//     if (!createdProduct) {
+//       return res.status(500).json({ message: 'Failed to create product' });
+//     }
+//     res.status(201).json(createdProduct);
+//   } catch (error) {
+//     res.status(500).json({ message: 'Server Error', error: error.message });
+//   }
+// });
 
 
 
