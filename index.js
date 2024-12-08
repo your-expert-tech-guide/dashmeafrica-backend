@@ -108,6 +108,8 @@ const getMonnifyToken = async () => {
 app.post('/api/payment', async (req, res) => {
   const { amount, email, phoneNumber, paymentReference } = req.body;
 
+  console.log(req.body)
+
   if (!amount || !email || !phoneNumber || !paymentReference) {
     return res.status(400).json({ success: false, message: 'All fields are required' });
   }
@@ -122,9 +124,8 @@ app.post('/api/payment', async (req, res) => {
       customerPhone: phoneNumber,
       contractCode: MONNIFY_CONTRACT_CODE,
       paymentReference,
-      redirectUrl: 'http://localhost:5173/adminDashboard',
+      redirectUrl: `http://localhost:5173/payment-page?paymentReference=${paymentReference}`,
     };
-
     const response = await axios.post(
       `${MONNIFY_BASE_URL}/api/v1/merchant/transactions/init-transaction`,
       paymentData,
@@ -147,6 +148,8 @@ app.post('/api/payment', async (req, res) => {
     res.status(500).json({ success: false, message: 'An error occurred during payment initiation' });
   }
 });
+
+
 // Endpoint to create a Customer Reserved Account
 app.post('/api/reserved-account', async (req, res) => {
   const { accountReference, accountName, customerEmail, customerName } = req.body;
