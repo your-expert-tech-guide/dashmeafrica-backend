@@ -4,8 +4,8 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const axios = require('axios');
 const path = require('path');
-const ReservedAccount = require('./models/ReservedAccount');
 
+const ReservedAccount = require('./models/ReservedAccount');
 
 const productRoutes = require('./routes/productRoutes');
 const userRoutes = require('./routes/userRoutes');
