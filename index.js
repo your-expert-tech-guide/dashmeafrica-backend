@@ -124,8 +124,9 @@ app.post('/api/payment', async (req, res) => {
       customerPhone: phoneNumber,
       contractCode: MONNIFY_CONTRACT_CODE,
       paymentReference,
-      redirectUrl: `http://localhost:5173/payment-page?paymentReference=${paymentReference}`,
+      redirectUrl: 'http://localhost:5173/payment-page',
     };
+// http://localhost:5173/adminDashboard?paymentReference=${paymentReference}
     const response = await axios.post(
       `${MONNIFY_BASE_URL}/api/v1/merchant/transactions/init-transaction`,
       paymentData,
