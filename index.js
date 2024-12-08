@@ -248,6 +248,53 @@ app.get('/api/account/:accountReference', async (req, res) => {
   }
 });
 
+// Endpoint to Disburse Funds (Payout)
+app.post('/api/disburse', async (req, res) => {
+  const { accountReference, amount } = req.body;
+
+  if (!accountReference || !amount) {
+    return res.status(400).json({ success: false, message: 'Account reference and amount are required' });
+  }
+
+  try {
+    const token = await getMonnifyToken();
+    const payoutData = {
+      amount,
+      accountReference,
+      currencyCode: 'NGN',
+      contractCode: MONNIFY_CONTRACT_CODE,
+    };
+
+    const response = await axios.post(
+      `${MONNIFY_BASE_URL}/api/v1/disbursements`,
+      payoutData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (response.data.responseCode === '00') {
+      return res.status(200).json({
+        success: true,
+        message: 'Disbursement initiated successfully',
+        transactionReference: response.data.responseBody.transactionReference,
+      });
+    } else {
+      return res.status(500).json({
+        success: false,
+        message: 'Disbursement initiation failed',
+      });
+    }
+  } catch (error) {
+    console.error('Error during payout initiation:', error.response?.data || error.message);
+    res.status(500).json({ success: false, message: 'An error occurred during payout initiation' });
+  }
+});
+
+
 // app.get('/api/verify-transaction/:transactionReference', async (req, res) => {
 //   const { transactionReference } = req.params;
 
