@@ -74,6 +74,38 @@ app.use('/api/userProfile', userProfileRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/payment', paymentRoutes);
 
+
+// Route: Webhook for Payment Notifications
+app.post('/webhook', async (req, res) => {
+  console.log('Webhook received:', req.body); // Log incoming data
+  const { transactionReference, paymentStatus } = req.body;
+
+  // Respond quickly to Monnify to acknowledge receipt
+  res.status(200).send('Webhook received');
+
+  try {
+      // Handle the webhook logic here
+      const token = await getMonnifyToken();
+      const response = await axios.get(
+          `${MONNIFY_BASE_URL}/api/v2/transactions/${transactionReference}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const transactionData = response.data.responseBody;
+      if (transactionData.paymentStatus === 'PAID') {
+          await Transaction.updateOne(
+              { transactionReference },
+              { status: 'PAID', updatedAt: new Date() }
+          );
+          console.log('Transaction verified and updated');
+      } else {
+          console.log('Transaction not yet completed');
+      }
+  } catch (error) {
+      console.error('Error processing webhook:', error.message);
+  }
+});
+
 // router.post('/monnify-webhook', async (req, res) => {
 //   const notificationData = req.body;
 
