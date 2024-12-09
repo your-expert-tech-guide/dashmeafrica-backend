@@ -342,84 +342,114 @@ router.post('/initiate-payment', async (req, res) => {
 
 
 // Function to disburse funds to the seller
-const disburseFunds = async ({ amount, bankCode, accountNumber, narration }) => {
-    try {
-      const token = await getMonnifyToken(); // Get Bearer Token
+// const disburseFunds = async ({ amount, bankCode, accountNumber, narration }) => {
+//     try {
+//       const token = await getMonnifyToken(); // Get Bearer Token
   
-      const response = await axios.post(
-        `${MONNIFY_BASE_URL}/api/v1/disbursements/single`,
-        {
-          amount,
-          destinationBankCode: bankCode,
-          destinationAccountNumber: accountNumber,
-          narration,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+//       const response = await axios.post(
+//         `${MONNIFY_BASE_URL}/api/v1/disbursements/single`,
+//         {
+//           amount,
+//           destinationBankCode: bankCode,
+//           destinationAccountNumber: accountNumber,
+//           narration,
+//         },
+//         { headers: { Authorization: `Bearer ${token}` } }
+//       );
   
-      return response.data;
-    } catch (error) {
-      console.error('Error disbursing funds:', error.response?.data || error.message);
-      throw new Error('Failed to disburse funds');
-    }
-  };
+//       return response.data;
+//     } catch (error) {
+//       console.error('Error disbursing funds:', error.response?.data || error.message);
+//       throw new Error('Failed to disburse funds');
+//     }
+//   };
   
 
 
 
 // Route: Verify Payment and Disburse Funds
-router.post('/verify-payment', async (req, res) => {
-    const { transactionReference, sellerBankCode, sellerAccountNumber } = req.body;
+// router.post('/verify-payment', async (req, res) => {
+//     const { transactionReference, sellerBankCode, sellerAccountNumber } = req.body;
   
-    if (!transactionReference || !sellerBankCode || !sellerAccountNumber) {
-      return res.status(400).json({ success: false, message: 'All fields are required.' });
+//     if (!transactionReference || !sellerBankCode || !sellerAccountNumber) {
+//       return res.status(400).json({ success: false, message: 'All fields are required.' });
+//     }
+  
+//     try {
+//       const token = await getMonnifyToken(); // Fetch Bearer Token
+  
+//       // Verify transaction with Monnify
+//       const response = await axios.get(
+//         `${MONNIFY_BASE_URL}/api/v2/transactions/${transactionReference}`,
+//         {
+//           headers: { Authorization: `Bearer ${token}` },
+//         }
+//       );
+  
+//       const transactionData = response.data.responseBody;
+  
+//       if (transactionData.paymentStatus === 'PAID') {
+//         // Update transaction status
+//         await Transaction.updateOne(
+//           { transactionReference },
+//           { status: 'PAID', updatedAt: new Date() }
+//         );
+  
+//         // Disburse funds to seller
+//         const narration = `Payment for order ${transactionReference}`;
+//         const disbursementResponse = await disburseFunds({
+//           amount: transactionData.amountPaid,
+//           bankCode: sellerBankCode,
+//           accountNumber: sellerAccountNumber,
+//           narration,
+//         });
+  
+//         return res.status(200).json({
+//           success: true,
+//           message: 'Payment successfully verified and disbursed to seller.',
+//           transactionData,
+//           disbursementResponse,
+//         });
+//       } else {
+//         return res.status(400).json({
+//           success: false,
+//           message: 'Payment is not yet completed.',
+//           transactionData,
+//         });
+//       }
+//     } catch (error) {
+//       console.error('Error verifying payment or disbursing funds:', error.response?.data || error.message);
+//       res.status(500).json({ success: false, message: 'Error verifying payment or disbursing funds' });
+//     }
+//   });
+  
+
+router.post('/api/verify-payment', async (req, res) => {
+    const { transactionReference } = req.body;
+  
+    if (!transactionReference) {
+      return res.status(400).json({ error: 'Transaction reference is required' });
     }
   
     try {
       const token = await getMonnifyToken(); // Fetch Bearer Token
-  
-      // Verify transaction with Monnify
       const response = await axios.get(
         `${MONNIFY_BASE_URL}/api/v2/transactions/${transactionReference}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
   
       const transactionData = response.data.responseBody;
-  
       if (transactionData.paymentStatus === 'PAID') {
-        // Update transaction status
-        await Transaction.updateOne(
-          { transactionReference },
-          { status: 'PAID', updatedAt: new Date() }
-        );
-  
-        // Disburse funds to seller
-        const narration = `Payment for order ${transactionReference}`;
-        const disbursementResponse = await disburseFunds({
-          amount: transactionData.amountPaid,
-          bankCode: sellerBankCode,
-          accountNumber: sellerAccountNumber,
-          narration,
-        });
-  
-        return res.status(200).json({
-          success: true,
-          message: 'Payment successfully verified and disbursed to seller.',
-          transactionData,
-          disbursementResponse,
-        });
+        // Handle successful payment
+        console.log('Payment verified:', transactionData);
+        res.status(200).json({ success: true, data: transactionData });
       } else {
-        return res.status(400).json({
-          success: false,
-          message: 'Payment is not yet completed.',
-          transactionData,
-        });
+        console.log('Payment not completed:', transactionData);
+        res.status(200).json({ success: false, data: transactionData });
       }
     } catch (error) {
-      console.error('Error verifying payment or disbursing funds:', error.response?.data || error.message);
-      res.status(500).json({ success: false, message: 'Error verifying payment or disbursing funds' });
+      console.error('Error verifying payment:', error.message);
+      res.status(500).json({ error: 'Failed to verify payment' });
     }
   });
   

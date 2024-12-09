@@ -102,37 +102,116 @@ const getMonnifyToken = async () => {
 
 
 // Route: Webhook for Payment Notifications
+// app.post('/api/webhook', async (req, res) => {
+//   console.log('Webhook received:', req.body); // Log incoming data
+//   const { transactionReference, paymentStatus } = req.body;
+
+//   // Respond quickly to Monnify to acknowledge receipt
+//   res.status(200).send('Webhook received');
+
+//   try {
+//       // Handle the webhook logic here
+//       const token = await getMonnifyToken();
+//       const response = await axios.get(
+//           `${MONNIFY_BASE_URL}/api/v2/transactions/${transactionReference}`,
+//           { headers: { Authorization: `Bearer ${token}` } }
+//       );
+
+//       const transactionData = response.data.responseBody;
+//       if (transactionData.paymentStatus === 'PAID') {
+//           await Transaction.updateOne(
+//               { transactionReference },
+//               { status: 'PAID', updatedAt: new Date() }
+//           );
+//           console.log('Transaction verified and updated');
+//       } else {
+//           console.log('Transaction not yet completed');
+//       }
+//   } catch (error) {
+//       console.error('Error processing webhook:', error.message);
+//   }
+// });
+
+// app.post('/api/webhook', async (req, res) => {
+//   console.log('Webhook received:', req.body); // Log incoming data
+  
+//   const { transactionReference, paymentStatus } = req.body;
+
+//   // Basic validation
+//   if (!transactionReference || !paymentStatus) {
+//     console.error('Invalid webhook payload');
+//     return res.status(400).send('Invalid webhook payload');
+//   }
+
+//   // Respond to Monnify quickly
+//   res.status(200).send('Webhook received');
+
+//   try {
+//     // Verify authenticity of the webhook (if applicable)
+//     // const isValidRequest = verifyMonnifySignature(req.headers, req.body); // Add your verification logic
+//     // if (!isValidRequest) {
+//     //   console.error('Invalid webhook signature');
+//     //   return res.status(401).send('Unauthorized');
+//     // }
+
+//     const token = await getMonnifyToken(); // Fetch Bearer Token
+
+//     // Verify transaction status with Monnify
+//     const response = await axios.get(
+//       `${MONNIFY_BASE_URL}/api/v2/transactions/${transactionReference}`,
+//       { headers: { Authorization: `Bearer ${token}` } }
+//     );
+
+//     const transactionData = response.data.responseBody;
+
+//     if (transactionData.paymentStatus === 'PAID') {
+//       // Update or insert transaction record
+//       await Transaction.updateOne(
+//         { transactionReference },
+//         { $set: { status: 'PAID', updatedAt: new Date() } },
+//         { upsert: true }
+//       );
+//       console.log(`Transaction ${transactionReference} verified and updated as PAID`);
+//     } else {
+//         console.log(`Transaction ${transactionReference} not yet completed: ${transactionData.paymentStatus}`);
+//       }
+//     } catch (error) {
+//       // Log error details for better debugging
+//       console.error(`Error processing webhook for transaction ${transactionReference}:`, error.message);
+      
+//       // Log Monnify response if available
+//       if (error.response) {
+//         console.error('Monnify Response:', error.response.data);
+//       }
+//     }
+//   });
+  
+
 app.post('/api/webhook', async (req, res) => {
-  console.log('Webhook received:', req.body); // Log incoming data
+  console.log('Webhook received:', req.body);
+
   const { transactionReference, paymentStatus } = req.body;
 
-  // Respond quickly to Monnify to acknowledge receipt
+  // Respond quickly to Monnify
   res.status(200).send('Webhook received');
 
+  if (!transactionReference || !paymentStatus) {
+    console.error('Invalid webhook payload:', req.body);
+    return;
+  }
+
+  // Forward the transactionReference to /verify-payment
   try {
-    const token = await getMonnifyToken(); // Fetch Bearer Token
-
-    // Verify transaction status with Monnify
-    const response = await axios.get(
-      `${MONNIFY_BASE_URL}/api/v2/transactions/${transactionReference}`,
-      { headers: { Authorization: `Bearer ${token}` } }
+    const verificationResponse = await axios.post(
+      'https://dashmeafrica-backend.vercel.app/api/payment/verify-payment', // Replace with your server's domain
+      { transactionReference }
     );
-
-    const transactionData = response.data.responseBody;
-    if (transactionData.paymentStatus === 'PAID') {
-      // Update transaction record in the database
-      await Transaction.updateOne(
-        { transactionReference },
-        { status: 'PAID', updatedAt: new Date() }
-      );
-      console.log('Transaction verified and updated as PAID');
-    } else {
-      console.log('Transaction not yet completed');
-    }
+    console.log('Verification Response:', verificationResponse.data);
   } catch (error) {
-    console.error('Error processing webhook:', error.message);
+    console.error('Error forwarding to verify-payment:', error.message);
   }
 });
+
 
 
 // Start Server
