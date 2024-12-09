@@ -110,27 +110,30 @@ app.post('/api/webhook', async (req, res) => {
   res.status(200).send('Webhook received');
 
   try {
-      // Handle the webhook logic here
-      const token = await getMonnifyToken();
-      const response = await axios.get(
-          `${MONNIFY_BASE_URL}/api/v2/transactions/${transactionReference}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-      );
+    const token = await getMonnifyToken(); // Fetch Bearer Token
 
-      const transactionData = response.data.responseBody;
-      if (transactionData.paymentStatus === 'PAID') {
-          await Transaction.updateOne(
-              { transactionReference },
-              { status: 'PAID', updatedAt: new Date() }
-          );
-          console.log('Transaction verified and updated');
-      } else {
-          console.log('Transaction not yet completed');
-      }
+    // Verify transaction status with Monnify
+    const response = await axios.get(
+      `${MONNIFY_BASE_URL}/api/v2/transactions/${transactionReference}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    const transactionData = response.data.responseBody;
+    if (transactionData.paymentStatus === 'PAID') {
+      // Update transaction record in the database
+      await Transaction.updateOne(
+        { transactionReference },
+        { status: 'PAID', updatedAt: new Date() }
+      );
+      console.log('Transaction verified and updated as PAID');
+    } else {
+      console.log('Transaction not yet completed');
+    }
   } catch (error) {
-      console.error('Error processing webhook:', error.message);
+    console.error('Error processing webhook:', error.message);
   }
 });
+
 
 // Start Server
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
