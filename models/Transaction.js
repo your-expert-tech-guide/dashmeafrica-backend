@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 
-const transactionSchema = new mongoose.Schema({
-  paymentReference: { type: String, required: true, unique: true },
-  status: { type: String, required: true },
-  amountPaid: { type: Number, required: true },
+const TransactionSchema = new mongoose.Schema({
+  transactionReference: { type: String, required: true, unique: true },
+  status: { type: String, required: true, default: 'PENDING' },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date },
 });
 
-const Transaction = mongoose.model('Transaction', transactionSchema);
-module.exports = Transaction;
+module.exports = mongoose.model('Transaction', TransactionSchema);
