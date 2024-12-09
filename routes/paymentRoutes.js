@@ -136,45 +136,47 @@ const transactionReference = encodeURIComponent(paymentReference);
     res.status(500).json({ success: false, message: 'Error verifying payment' });
   }
 });
-// router.post('/monnify-webhook', async (req, res) => {
-//     const notificationData = req.body;
+
+
+router.post('/monnify-webhook', async (req, res) => {
+    const notificationData = req.body;
   
-//     // Verify the notification signature (optional but recommended)
-//     const monnifySignature = req.headers['monnify-signature'];
-//     const calculatedSignature = crypto
-//       .createHmac('sha512', MONNIFY_SECRET_KEY)
-//       .update(JSON.stringify(notificationData))
-//       .digest('hex');
+    // Verify the notification signature (optional but recommended)
+    const monnifySignature = req.headers['monnify-signature'];
+    const calculatedSignature = crypto
+      .createHmac('sha512', MONNIFY_SECRET_KEY)
+      .update(JSON.stringify(notificationData))
+      .digest('hex');
   
-//     if (monnifySignature !== calculatedSignature) {
-//       return res.status(401).json({ success: false, message: 'Invalid signature' });
-//     }
+    if (monnifySignature !== calculatedSignature) {
+      return res.status(401).json({ success: false, message: 'Invalid signature' });
+    }
   
-//     try {
-//       const { paymentReference, paymentStatus, amountPaid } = notificationData;
+    try {
+      const { paymentReference, paymentStatus, amountPaid } = notificationData;
   
-//       if (paymentStatus === 'PAID') {
-//         // Update the transaction status in your database
-//         await Transaction.updateOne(
-//           { paymentReference },
-//           { $set: { status: 'PAID', amountPaid } }
-//         );
+      if (paymentStatus === 'PAID') {
+        // Update the transaction status in your database
+        await Transaction.updateOne(
+          { paymentReference },
+          { $set: { status: 'PAID', amountPaid } }
+        );
   
-//         // Disburse funds to the seller (if applicable)
-//         const sellerAccount = await findSellerAccount(paymentReference);
-//         if (sellerAccount) {
-//           await disburseFunds(amountPaid, sellerAccount);
-//         }
+        // Disburse funds to the seller (if applicable)
+        const sellerAccount = await findSellerAccount(paymentReference);
+        if (sellerAccount) {
+          await disburseFunds(amountPaid, sellerAccount);
+        }
   
-//         return res.status(200).json({ success: true, message: 'Payment verified' });
-//       }
+        return res.status(200).json({ success: true, message: 'Payment verified' });
+      }
   
-//       res.status(200).json({ success: true, message: 'Payment status recorded' });
-//     } catch (error) {
-//       console.error('Error handling webhook:', error.message);
-//       res.status(500).json({ success: false, message: 'Server error' });
-//     }
-//   });
+      res.status(200).json({ success: true, message: 'Payment status recorded' });
+    } catch (error) {
+      console.error('Error handling webhook:', error.message);
+      res.status(500).json({ success: false, message: 'Server error' });
+    }
+  });
   
 
 // Function: Disburse Funds
