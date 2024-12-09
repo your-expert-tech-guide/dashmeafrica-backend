@@ -21,6 +21,7 @@ const ReservedAccountSchema = new mongoose.Schema({
         timestamp: Date,
       },
     ],
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // Link to User
     createdAt: { type: Date, default: Date.now },
   });
   
