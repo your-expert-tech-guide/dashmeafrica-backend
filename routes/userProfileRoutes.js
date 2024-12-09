@@ -4,6 +4,10 @@ const { protect } = require('../middleware/authMiddleware');
 const ReservedAccount = require('../models/ReservedAccount');
 
 // Example: Protected Profile Route
+router.get('/profile', protect, async (req, res) => {
+  res.json(req.user);
+});
+
 router.put('/profile', protect, async (req, res) => {
   try {
     const { firstName, lastName, username, email, address, bio } = req.body;
