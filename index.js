@@ -102,7 +102,7 @@ const getMonnifyToken = async () => {
 
 
 // Route: Webhook for Payment Notifications
-app.post('/webhook', async (req, res) => {
+app.post('/api/webhook', async (req, res) => {
   console.log('Webhook received:', req.body); // Log incoming data
   const { transactionReference, paymentStatus } = req.body;
 
