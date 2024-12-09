@@ -12,7 +12,7 @@ const generateToken = (id) => {
   return jwt.sign({ id }, "hello", { expiresIn: '30d' });
 };
 
-// Function to get Monnify Bearer Token
+// Function to get Monnify Bearer Token   sjsjsjjsjsjjs
 const getMonnifyToken = async () => {
   const MONNIFY_API_KEY = process.env.MONNIFY_API_KEY;
   const MONNIFY_SECRET_KEY = process.env.MONNIFY_SECRET_KEY;
