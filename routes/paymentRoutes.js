@@ -347,60 +347,114 @@ router.post('/initiate-payment', async (req, res) => {
 
 
 // Function to disburse funds to the seller
-// const disburseFunds = async ({ amount, bankCode, accountNumber, narration }) => {
-//     try {
-//       const token = await getMonnifyToken(); // Get Bearer Token
-  
-//       const response = await axios.post(
-//         `${MONNIFY_BASE_URL}/api/v1/disbursements/single`,
-//         {
-//           amount,
-//           destinationBankCode: bankCode,
-//           destinationAccountNumber: accountNumber,
-//           narration,
-//         },
-//         { headers: { Authorization: `Bearer ${token}` } }
-//       );
-  
-//       return response.data;
-//     } catch (error) {
-//       console.error('Error disbursing funds:', error.response?.data || error.message);
-//       throw new Error('Failed to disburse funds');
+const disburseFunds = async ({ amount, bankCode, accountNumber, narration }) => {
+    try {
+        const token = await getMonnifyToken(); // Get Bearer Token
+
+        const response = await axios.post(
+            `${MONNIFY_BASE_URL}/api/v1/disbursements/single`,
+            {
+                amount,
+                destinationBankCode: bankCode,
+                destinationAccountNumber: accountNumber,
+                narration,
+            },
+            { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        return response.data;
+    } catch (error) {
+        console.error('Error disbursing funds:', error.response?.data || error.message);
+        throw new Error('Failed to disburse funds');
+    }
+};
+
+
+// Route: Verify Payment
+// router.post('/verify-payment', async (req, res) => {
+//     const {
+//         customerBankCode,
+//         customerAccountNumber,
+//         sellerBankCode,
+//         sellerAccountNumber,
+//         amount
+//     } = req.body;
+
+//     // Validate the required fields
+//     if ( !sellerBankCode || !sellerAccountNumber || !amount) {
+//         return res.status(400).json({ success: false, message: 'Missing required fields' });
 //     }
-//   };
-  
-  
+
+//     try {
+//         // Get Monnify token
+//         const token = await getMonnifyToken();
+
+//         // Verify payment status using Monnify API
+//         const response = await axios.get(`${MONNIFY_BASE_URL}/api/v2/merchant/transactions/query?paymentReference=${paymentReference}`, {
+//             headers: { Authorization: `Bearer ${token}` },
+//         });
+
+//         const paymentStatus = response.data.responseBody.paymentStatus;
+
+//         // If payment is successful, proceed with disbursement
+//         if (paymentStatus === 'PAID') {
+//             // const amountToDisburse = (amount * 0.8).toFixed(2); // 80% to the customer
+//             const amountToDisburse = "10000"; // 80% to the customer
+
+//             // Disburse 80% to the customer
+//             await disburseFunds({
+//                 amount: amountToDisburse,
+//                 reference: `disb-${Date.now()}`,
+//                 narration: 'Disbursement for your sale.',
+//                 destinationBankCode: customerBankCode,
+//                 destinationAccountNumber: sellerAccountNumber,
+//                 currency: 'NGN',
+//                 sourceAccountNumber: "18835949303",
+//                 destinationAccountName: customerAccountNumber,
+//                 async: true,
+//             });
+
+//             // You may also want to handle updating the database with the transaction status
+//             return res.status(200).json({ success: true, message: 'Payment verified and funds disbursed successfully.' });
+//         } else {
+//             return res.status(400).json({ success: false, message: 'Payment not successful' });
+//         }
+//     } catch (error) {
+//         console.error('Error verifying payment:', error.response?.data || error.message);
+//         res.status(500).json({ success: false, message: 'Error verifying payment' });
+//     }
+// });
+
 
 // Route: Verify Payment
 router.post('/verify-payment', async (req, res) => {
-    const { transactionReference } = req.body;
-  
-    if (!transactionReference) {
-      return res.status(400).json({ success: false, message: 'Transaction reference is required.' });
+
+    const { paymentReference } = req.body;
+
+    if (!paymentReference) {
+        return res.status(400).json({ success: false, message: 'Transaction reference is required.' });
     }
-  
+
     try {
-      const token = await getMonnifyToken();
-      const response = await axios.get(`${MONNIFY_BASE_URL}/api/v2/transactions/${transactionReference}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-  
-      const paymentStatus = response.data.responseBody.paymentStatus;
-      if (paymentStatus === 'PAID') {
-        // Perform post-payment actions (e.g., update database, notify user)
-        return res.status(200).json({ success: true, message: 'Payment verified successfully.' });
-      } else {
-        return res.status(400).json({ success: false, message: 'Payment not successful' });
-      }
+        const token = await getMonnifyToken();
+
+        const response = await axios.get(`${MONNIFY_BASE_URL}/api/v2/merchant/transactions/query?paymentReference=${paymentReference}`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const paymentStatus = response.data.responseBody.paymentStatus;
+
+        if (paymentStatus === 'PAID') {
+            // Perform post-payment actions (e.g., update database, notify user)
+            return res.status(200).json({ success: true, message: 'Payment verified successfully.' });
+        } else {
+            return res.status(400).json({ success: false, message: 'Payment not successful' });
+        }
     } catch (error) {
-      console.error('Error verifying payment:', error.response?.data || error.message);
-      res.status(500).json({ success: false, message: 'Error verifying payment' });
+        console.error('Error verifying payment:', error.response?.data || error.message);
+        res.status(500).json({ success: false, message: 'Error verifying payment' });
     }
-  });   
-  
 
-
-
-
+});
 
 module.exports = router;

@@ -70,8 +70,6 @@ router.post('/register', async (req, res) => {
     // Create new user
     const savedUser = await newUser.save();
 
-    // console.log(savedUser)
-
     // Create Monnify reserved account
     const token = await getMonnifyToken();
     const accountReference = `REF-${Date.now()}`;
@@ -86,10 +84,6 @@ router.post('/register', async (req, res) => {
       customerName: fullName,
       getAllAvailableBanks: true,
     };
-    console.log(requestData)
-
-    console.log(process.env.MONNIFY_BASE_URL)
-    console.log(token)
 
     try {
       // Create a Customer Reserved Account
@@ -103,8 +97,6 @@ router.post('/register', async (req, res) => {
           },
         }
       );
-
-      console.log(response)
 
       const reservedAccountDetails = response.data.responseBody;
 

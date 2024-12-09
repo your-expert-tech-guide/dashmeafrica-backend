@@ -100,32 +100,32 @@ const getMonnifyToken = async () => {
 };
 
 
-app.post('/api/webhook', async (req, res) => {
-  console.log('Webhook received:', req.body);
+// app.post('/api/webhook', async (req, res) => {
+//   console.log('Webhook received:', req.body);
 
-  const { transactionReference, paymentStatus } = req.body;
+//   const { transactionReference, paymentStatus } = req.body;
 
-  // Respond quickly to Monnify
-  res.status(200).send('Webhook received');
+//   // Respond quickly to Monnify
+//   res.status(200).send('Webhook received');
 
-  if (!transactionReference || !paymentStatus) {
-    console.error('Invalid webhook payload:', req.body);
-    return;
-  }
+//   if (!transactionReference || !paymentStatus) {
+//     console.error('Invalid webhook payload:', req.body);
+//     return;
+//   }
 
-  // Forward the transactionReference to /verify-payment
-  try {
-    const verificationResponse = await axios.post(
-      'https://dashmeafrica-backend.vercel.app/api/payment/verify-payment', // Replace with your server's domain
-      { transactionReference }
-    );
+//   // Forward the transactionReference to /verify-payment
+//   try {
+//     const verificationResponse = await axios.post(
+//       'https://dashmeafrica-backend.vercel.app/api/payment/verify-payment', // Replace with your server's domain
+//       { transactionReference }
+//     );
 
-    console.log(transactionReference);
-    console.log('Verification Response:', verificationResponse.data);
-  } catch (error) {
-    console.error('Error forwarding to verify-payment:', error.message);
-  }
-});
+//     console.log(transactionReference);
+//     console.log('Verification Response:', verificationResponse.data);
+//   } catch (error) {
+//     console.error('Error forwarding to verify-payment:', error.message);
+//   }
+// });
 
 
 // Start Server

@@ -38,29 +38,27 @@ router.get('/userAccountDetails', protect, async (req, res) => {
   }
 });
 
-// Route to get seller account by ID
+// Route to get seller account details by seller ID
 router.get('/seller/:id/account', async (req, res) => {
   const { id } = req.params; // Extract the seller ID from the route parameter
 
-  console.log(id)
-
   try {
-      // Find the seller by their ID
-      // const sellerAccount = await ReservedAccount.findById(id).populate('userId');
+    // Find the seller's account details from the ReservedAccount model
+    const sellerAccount = await ReservedAccount.findOne({ userId: id });
 
-      const sellerAccount = await ReservedAccount.findOne({ userId: id });
+    if (!sellerAccount) {
+      return res.status(404).json({ message: "Seller account not found." });
+    }
 
-      // console.log(sellerAccount.accounts[0].accountNumber)
-      const sellerAcctNumber = sellerAccount.accounts[0]
-
-      if (!sellerAccount) {
-          return res.status(404).json({ message: 'Seller not found' });
-      }
-
-      res.status(200).json({ sellerAcctNumber });
+    // Send back the seller account details (account number, name, and code)
+    res.json({
+      sellerAcctNumber: sellerAccount.accountNumber,
+      sellerAcctName: sellerAccount.accountName,
+      sellerAcctCode: sellerAccount.accountCode,
+    });
   } catch (error) {
-      console.error('Error fetching seller account:', error);
-      res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    console.error(error);
+    res.status(500).json({ message: "Error fetching seller account." });
   }
 });
 
