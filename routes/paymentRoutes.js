@@ -326,7 +326,12 @@ router.post('/initiate-payment', async (req, res) => {
             }
         );
 
-        console.log(response)
+        console.log(response.data.responseBody?.transactionReference)
+
+        // Example: Save transactionReference before redirection
+        const transactionReference = response.data.responseBody?.transactionReference;
+        localStorage.setItem("transactionReference", transactionReference);
+
 
         const paymentLink = response.data.responseBody?.checkoutUrl;
         if (paymentLink) {
