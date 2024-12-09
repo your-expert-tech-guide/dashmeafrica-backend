@@ -4,9 +4,23 @@ const { protect } = require('../middleware/authMiddleware');
 const ReservedAccount = require('../models/ReservedAccount');
 
 // Example: Protected Profile Route
-router.get('/profile', protect, async (req, res) => {
-  res.json(req.user);
+router.put('/profile', protect, async (req, res) => {
+  try {
+    const { firstName, lastName, username, email, address, bio } = req.body;
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      { fullName: firstName, lastname: lastName, username, email, address, bio },
+      { new: true }
+    );
+
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    console.error('Error updating profile:', error.message);
+    res.status(500).json({ message: 'Internal server error' });
+  }
 });
+
 
 // Endpoint to get user details along with their reserved account details
 router.get('/userAccountDetails', protect, async (req, res) => {
