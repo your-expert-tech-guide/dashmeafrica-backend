@@ -51,7 +51,7 @@ router.get('/seller/:id/account', async (req, res) => {
       const sellerAccount = await ReservedAccount.findOne({ userId: id });
 
       // console.log(sellerAccount.accounts[0].accountNumber)
-      const sellerAcctNumber = sellerAccount.accounts[0].accountNumber
+      const sellerAcctNumber = sellerAccount.accounts[0]
 
       if (!sellerAccount) {
           return res.status(404).json({ message: 'Seller not found' });
