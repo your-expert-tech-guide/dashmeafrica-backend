@@ -326,16 +326,16 @@ router.post('/initiate-payment', async (req, res) => {
             }
         );
 
-        console.log(response.data.responseBody?.transactionReference)
 
-        // Example: Save transactionReference before redirection
         const transactionReference = response.data.responseBody?.transactionReference;
-        localStorage.setItem("transactionReference", transactionReference);
-
-
         const paymentLink = response.data.responseBody?.checkoutUrl;
+
         if (paymentLink) {
-            return res.status(200).json({ success: true, responseBody: response.data.responseBody });
+            return res.status(200).json({
+                success: true,
+                paymentLink,
+                transactionReference,
+            });
         } else {
             return res.status(500).json({ success: false, message: 'Payment initiation failed' });
         }
