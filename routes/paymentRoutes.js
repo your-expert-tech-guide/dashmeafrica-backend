@@ -312,7 +312,7 @@ router.post('/initiate-payment', async (req, res) => {
             customerPhone: phoneNumber,
             contractCode: MONNIFY_CONTRACT_CODE,
             paymentReference,
-            redirectUrl: 'http://localhost:5173/payment-page',
+            redirectUrl: 'https://dashmeafrica-backend.vercel.app/payment-page',
         };
 
         const response = await axios.post(

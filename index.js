@@ -75,6 +75,32 @@ app.use('/api/users', userRoutes);
 app.use('/api/payment', paymentRoutes);
 
 
+// Function to get Monnify Bearer Token
+const getMonnifyToken = async () => {
+  try {
+      const credentials = `${MONNIFY_API_KEY}:${MONNIFY_SECRET_KEY}`;
+      const base64Credentials = Buffer.from(credentials).toString('base64');
+
+      const response = await axios.post(
+          `${MONNIFY_BASE_URL}/api/v1/auth/login`,
+          {},
+          {
+              headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Basic ${base64Credentials}`,
+              },
+          }
+      );
+
+      return response.data.responseBody.accessToken;
+  } catch (error) {
+      console.error('Error fetching Monnify token:', error.response?.data || error.message);
+      throw new Error('Failed to fetch Monnify token');
+  }
+};
+
+
+
 // Route: Webhook for Payment Notifications
 app.post('/webhook', async (req, res) => {
   console.log('Webhook received:', req.body); // Log incoming data
@@ -105,6 +131,12 @@ app.post('/webhook', async (req, res) => {
       console.error('Error processing webhook:', error.message);
   }
 });
+
+// Start Server
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+module.exports = app;
+
 
 // router.post('/monnify-webhook', async (req, res) => {
 //   const notificationData = req.body;
@@ -329,7 +361,4 @@ app.post('/webhook', async (req, res) => {
 // });
 
 
-// Start Server
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
-module.exports = app;
