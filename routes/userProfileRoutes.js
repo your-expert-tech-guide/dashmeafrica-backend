@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { protect } = require('../middleware/authMiddleware');
 const ReservedAccount = require('../models/ReservedAccount');
+const User = require('../models/User');
 
 // Example: Protected Profile Route
 router.get('/profile', protect, async (req, res) => {
