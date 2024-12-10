@@ -11,16 +11,17 @@ router.get('/profile', protect, async (req, res) => {
 
 router.put('/profile', protect, async (req, res) => {
   try {
-    const { firstName, lastName, username, email, address, bio } = req.body;
+    const { fullName, lastName, username, email, address, bio } = req.body;
 
     console.log(req.body)
 
     const updatedUser = await User.findByIdAndUpdate(
       req.user._id,
-      { fullName: firstName, lastname: lastName, username, email, address, bio },
+      { fullName: fullName, lastname: lastName, username, email, address, bio },
       { new: true }
     );
 
+    console.log(updatedUser)
     res.status(200).json(updatedUser);
   } catch (error) {
     console.error('Error updating profile:', error.message);
@@ -71,11 +72,13 @@ router.get('/seller/:id/account', async (req, res) => {
       return res.status(404).json({ message: "Seller account not found." });
     }
 
+    // console.log(sellerAccount)
     // Send back the seller account details (account number, name, and code)
     res.json({
-      sellerAcctNumber: sellerAccount.accountNumber,
+      sellerAcctNumber: sellerAccount.accounts[0].accountNumber,
       sellerAcctName: sellerAccount.accountName,
-      sellerAcctCode: sellerAccount.accountCode,
+      sellerAcctBank: sellerAccount.accounts[0].bankName,
+      sellerAcctCode: sellerAccount.accounts[0].bankCode,
     });
   } catch (error) {
     console.error(error);

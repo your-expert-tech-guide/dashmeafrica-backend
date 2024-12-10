@@ -15,30 +15,13 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true,
       unique: true,
-    },
+    },                                                                                                                                                                                                            
     password: {
       type: String,
       required: true,
     },
-    address: {
-      type: String,
-      default: '',
-    },
     bio: {
       type: String,
-      default: '',
-    },
-    profilePicture: {
-      type: String,
-      default: '', // You can use a default placeholder image URL
-    },
-    followers: {
-      type: Number,
-      default: 0,
-    },
-    following: {
-      type: Number,
-      default: 0,
     },
   },
   {
