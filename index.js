@@ -5,7 +5,7 @@ const cors = require('cors');
 const axios = require('axios');
 const path = require('path');
 
-const ReservedAccount = require('./models/ReservedAccount');
+// const ReservedAccount = require('./models/ReservedAccount');
 
 const productRoutes = require('./routes/productRoutes');
 const userRoutes = require('./routes/userRoutes');
@@ -14,6 +14,7 @@ const adminRoutes = require('./routes/adminRoutes');
 const adminDashboardRoutes = require('./routes/adminDashboardRoutes');
 const adminProductRoutes = require('./routes/adminProductRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
+const myProductRoutes = require('./routes/myProductRoutes');
 
 dotenv.config();
 
@@ -26,8 +27,12 @@ const MONNIFY_API_KEY = process.env.MONNIFY_API_KEY;
 const MONNIFY_SECRET_KEY = process.env.MONNIFY_SECRET_KEY;
 const MONNIFY_CONTRACT_CODE = process.env.MONNIFY_CONTRACT_CODE;
 const MONNIFY_BASE_URL = process.env.MONNIFY_BASE_URL || 'https://sandbox.monnify.com'; // Use `https://api.monnify.com` for production
+const GOSHIIP_BASE_URL = 'https://delivery-staging.apiideraos.com/api/v2';
+const AUTH_TOKEN = 'Bearer <Your_Secret_Key>'; // Replace with your actual GoShiip API key
+
 
 const PORT = process.env.PORT || 5000;
+
 
 // CORS Configuration
 const allowedOrigins = [
@@ -44,7 +49,7 @@ const corsOptions = {
       callback(new Error(`CORS policy error: ${origin} is not allowed.`));
     }
   },
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
 };
@@ -73,6 +78,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/userProfile', userProfileRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use('/api/myProducts', myProductRoutes);
 
 
 // Function to get Monnify Bearer Token
@@ -100,261 +106,58 @@ const getMonnifyToken = async () => {
 };
 
 
-// app.post('/api/webhook', async (req, res) => {
-//   console.log('Webhook received:', req.body);
+// Endpoint to get available couriers
+app.get('/api/getAvailableCouriers', async (req, res) => {
+  const { type } = req.query;  // Get the type from the query params
 
-//   const { transactionReference, paymentStatus } = req.body;
+  if (!type) {
+      return res.status(400).json({ message: 'The type field is required.' });
+  }
 
-//   // Respond quickly to Monnify
-//   res.status(200).send('Webhook received');
+  try {
+      const response = await axios.get(
+          `${GOSHIIP_BASE_URL}/token/shipments/courier-partners`,
+          {
+              params: { type },
+              headers: {
+                  'Authorization': AUTH_TOKEN,
+              },
+          }
+      );
+      res.status(200).send(response.data);  // Send the couriers list back to the frontend
+  } catch (error) {
+      console.error('Error fetching couriers:', error.response?.data || error.message);
+      res.status(500).send(error.response?.data || { message: 'Internal Server Error' });
+  }
+});
 
-//   if (!transactionReference || !paymentStatus) {
-//     console.error('Invalid webhook payload:', req.body);
-//     return;
-//   }
+// Endpoint to get rates from GoShiip
+app.post('/api/getRate', async (req, res) => {
+  try {
+      const { carrierName, payload } = req.body;
 
-//   // Forward the transactionReference to /verify-payment
-//   try {
-//     const verificationResponse = await axios.post(
-//       'https://dashmeafrica-backend.vercel.app/api/payment/verify-payment', // Replace with your server's domain
-//       { transactionReference }
-//     );
+      const response = await axios.post(
+          `${GOSHIIP_BASE_URL}/token/tariffs/getpricesingle/${carrierName}`,
+          payload,
+          {
+              headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: AUTH_TOKEN,
+              },
+          }
+      );
 
-//     console.log(transactionReference);
-//     console.log('Verification Response:', verificationResponse.data);
-//   } catch (error) {
-//     console.error('Error forwarding to verify-payment:', error.message);
-//   }
-// });
+      res.status(200).send(response.data);
+  } catch (error) {
+      console.error('Error fetching rate:', error.response?.data || error.message);
+      res.status(500).send(error.response?.data || { message: 'Internal Server Error' });
+  }
+});
 
 
 // Start Server
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 module.exports = app;
-
-
-// router.post('/monnify-webhook', async (req, res) => {
-//   const notificationData = req.body;
-
-//   // Verify the notification signature (optional but recommended)
-//   const monnifySignature = req.headers['monnify-signature'];
-//   const calculatedSignature = crypto
-//     .createHmac('sha512', MONNIFY_SECRET_KEY)
-//     .update(JSON.stringify(notificationData))
-//     .digest('hex');
-
-//   if (monnifySignature !== calculatedSignature) {
-//     return res.status(401).json({ success: false, message: 'Invalid signature' });
-//   }
-
-//   try {
-//     const { paymentReference, paymentStatus, amountPaid } = notificationData;
-
-//     if (paymentStatus === 'PAID') {
-//       // Update the transaction status in your database
-//       await Transaction.updateOne(
-//         { paymentReference },
-//         { $set: { status: 'PAID', amountPaid } }
-//       );
-
-//       // Disburse funds to the seller (if applicable)
-//       const sellerAccount = await findSellerAccount(paymentReference);
-//       if (sellerAccount) {
-//         await disburseFunds(amountPaid, sellerAccount);
-//       }
-
-//       return res.status(200).json({ success: true, message: 'Payment verified' });
-//     }
-
-//     res.status(200).json({ success: true, message: 'Payment status recorded' });
-//   } catch (error) {
-//     console.error('Error handling webhook:', error.message);
-//     res.status(500).json({ success: false, message: 'Server error' });
-//   }
-// });
-
-// Function to get Monnify Bearer Token
-// const getMonnifyToken = async () => {
-//   try {
-//     // Construct the Base64-encoded apiKey:secretKey string
-//     const credentials = `${MONNIFY_API_KEY}:${MONNIFY_SECRET_KEY}`;
-//     const base64Credentials = Buffer.from(credentials).toString('base64');
-
-//     // Make the POST request to Monnify's login endpoint
-//     const response = await axios.post(
-//       `${MONNIFY_BASE_URL}/api/v1/auth/login`,
-//       {}, // No body is required for this request
-//       {
-//         headers: {
-//           'Content-Type': 'application/json',
-//           Authorization: `Basic ${base64Credentials}`,
-//         },
-//       }
-//     );
-
-//     return response.data.responseBody.accessToken;
-//   } catch (error) {
-//     console.error(
-//       'Error fetching Monnify token:',
-//       error.response?.data || error.message
-//     );
-//     throw new Error('Failed to fetch Monnify token');
-//   }
-// };
-
-
-
-
-// Webhook Endpoint
-// app.post('/api/webhook', async (req, res) => {
-//   const { transactionReference, paymentReference, amountPaid, paymentStatus } = req.body;
-
-//   try {
-//     if (paymentStatus === 'PAID') {
-//       const reservedAccount = await ReservedAccount.findOne({ accountReference: paymentReference });
-
-//       if (reservedAccount) {
-//         // Update transaction details
-//         reservedAccount.balance = (reservedAccount.balance || 0) + amountPaid;
-//         reservedAccount.lastTransaction = {
-//           transactionReference,
-//           amountPaid,
-//           paymentStatus,
-//           updatedAt: new Date(),
-//         };
-//         await reservedAccount.save();
-
-//         console.log('Transaction processed and database updated.');
-//         return res.status(200).json({ success: true, message: 'Payment processed successfully.' });
-//       }
-//     }
-
-//     console.log('Payment status not valid or account not found.');
-//     res.status(400).json({ success: false, message: 'Payment verification failed.' });
-//   } catch (error) {
-//     console.error('Webhook processing error:', error.message);
-//     res.status(500).json({ success: false, message: 'Internal server error.' });
-//   }
-// });
-
-// API to Fetch Account and Transaction Details
-// app.get('/api/account/:accountReference', async (req, res) => {
-//   const { accountReference } = req.params;
-
-//   try {
-//     const account = await ReservedAccount.findOne({ accountReference });
-
-//     if (!account) {
-//       return res.status(404).json({ success: false, message: 'Account not found.' });
-//     }
-
-//     res.status(200).json({ success: true, data: account });
-//   } catch (error) {
-//     console.error('Error fetching account details:', error.message);
-//     res.status(500).json({ success: false, message: 'Internal server error.' });
-//   }
-// });
-
-// Endpoint to Disburse Funds (Payout)
-// app.post('/api/disburse', async (req, res) => {
-//   const { accountReference, amount } = req.body;
-
-//   if (!accountReference || !amount) {
-//     return res.status(400).json({ success: false, message: 'Account reference and amount are required' });
-//   }
-
-//   try {
-//     const token = await getMonnifyToken();
-//     const payoutData = {
-//       amount,
-//       accountReference,
-//       currencyCode: 'NGN',
-//       contractCode: MONNIFY_CONTRACT_CODE,
-//     };
-
-//     const response = await axios.post(
-//       `${MONNIFY_BASE_URL}/api/v1/disbursements`,
-//       payoutData,
-//       {
-//         headers: {
-//           Authorization: `Bearer ${token}`,
-//           'Content-Type': 'application/json',
-//         },
-//       }
-//     );
-
-//     if (response.data.responseCode === '00') {
-//       return res.status(200).json({
-//         success: true,
-//         message: 'Disbursement initiated successfully',
-//         transactionReference: response.data.responseBody.transactionReference,
-//       });
-//     } else {
-//       return res.status(500).json({
-//         success: false,
-//         message: 'Disbursement initiation failed',
-//       });
-//     }
-//   } catch (error) {
-//     console.error('Error during payout initiation:', error.response?.data || error.message);
-//     res.status(500).json({ success: false, message: 'An error occurred during payout initiation' });
-//   }
-// });
-
-
-// app.get('/api/verify-transaction/:transactionReference', async (req, res) => {
-//   const { transactionReference } = req.params;
-
-//   try {
-//     const token = await getMonnifyToken();
-//     const response = await axios.get(
-//       `${MONNIFY_BASE_URL}/api/v2/transactions/${transactionReference}`,
-//       {
-//         headers: {
-//           Authorization: `Bearer ${token}`,
-//         },
-//       }
-//     );
-
-//     const transactionDetails = response.data.responseBody;
-
-//     if (transactionDetails.paymentStatus === 'PAID') {
-//       const reservedAccount = await ReservedAccount.findOne({
-//         accountReference: transactionDetails.paymentReference,
-//       });
-
-//       if (reservedAccount) {
-//         // Log the transaction
-//         if (!reservedAccount.transactions) {
-//           reservedAccount.transactions = [];
-//         }
-
-//         reservedAccount.transactions.push({
-//           transactionReference: transactionDetails.transactionReference,
-//           amountPaid: transactionDetails.amountPaid,
-//           paymentStatus: transactionDetails.paymentStatus,
-//           timestamp: new Date(),
-//         });
-
-//         // Update user balance
-//         reservedAccount.balance = (reservedAccount.balance || 0) + transactionDetails.amountPaid;
-
-//         // Save the updated reserved account
-//         await reservedAccount.save();
-
-//         return res.status(200).json({ success: true, data: transactionDetails });
-//       }
-
-//       return res.status(404).json({ success: false, message: 'Reserved account not found.' });
-//     }
-
-//     res.status(400).json({ success: false, message: 'Payment not verified.' });
-//   } catch (error) {
-//     console.error('Error verifying transaction:', error.response?.data || error.message);
-//     res.status(500).json({ success: false, message: 'An error occurred during transaction verification.' });
-//   }
-// });
-
 
 

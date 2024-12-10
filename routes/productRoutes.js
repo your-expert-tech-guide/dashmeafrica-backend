@@ -85,7 +85,6 @@ router.post('/', upload.single('image'), async (req, res) => {
   }
 });
 
-
 // @desc Create a new product to donate
 // @route POST /api/products/donate
 // @access Public
@@ -151,7 +150,6 @@ router.post('/donate', upload.single('image'), async (req, res) => {
   }
 });
 
-
 // @desc Get all products
 // @route GET /api/products
 // @access Public
@@ -163,7 +161,6 @@ router.get('/', async (req, res) => {
     res.status(500).json({ message: 'Server Error', error: error.message });
   }
 });
-
 
 // @desc Get a product by ID
 // @route GET /api/products/:id
@@ -185,6 +182,44 @@ router.get('/:id', async (req, res) => {
     res.status(500).json({ message: 'Server Error', error: error.message });
   }
 });
+
+// @desc Edit a product by ID
+// @route PATCH /api/products/:id
+// @access Private
+router.patch('/:id', async (req, res) => {
+  const { id } = req.params;
+  const updates = req.body;
+
+  try {
+    const updatedProduct = await Product.findByIdAndUpdate(id, updates, { new: true });
+    if (!updatedProduct) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    res.status(200).json(updatedProduct);
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error', error: error.message });
+  }
+});
+
+// @desc Delete a product by ID
+// @route DELETE /api/products/:id
+// @access Private
+router.delete('/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const deletedProduct = await Product.findByIdAndDelete(id);
+    if (!deletedProduct) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    res.status(200).json({ message: 'Product deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error', error: error.message });
+  }
+});
+
 
 // router.patch('/:id/availability', async (req, res) => {
 //   try {
