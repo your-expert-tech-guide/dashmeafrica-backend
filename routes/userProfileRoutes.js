@@ -13,6 +13,8 @@ router.put('/profile', protect, async (req, res) => {
   try {
     const { firstName, lastName, username, email, address, bio } = req.body;
 
+    console.log(req.body)
+
     const updatedUser = await User.findByIdAndUpdate(
       req.user._id,
       { fullName: firstName, lastname: lastName, username, email, address, bio },
