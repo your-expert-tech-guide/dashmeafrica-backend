@@ -44,11 +44,11 @@ router.get('/profile', protect, async (req, res) => {
 
 router.put('/profile', protect, upload.single('image'), async (req, res) => {
   try {
-    console.log('Request Body:', req.body);
+    // console.log('Request Body:', req.body);
 
     const { fullName, username, email, address, bio } = req.body;
 
-    if (!fullName || !username || !email || !address || !bio) {
+    if (!fullName || !username || !email) {
       return res.status(400).json({ message: 'Please provide all required fields' });
     }
 

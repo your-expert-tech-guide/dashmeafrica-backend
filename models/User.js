@@ -26,6 +26,9 @@ const userSchema = mongoose.Schema(
     profilePicture: {
       type: String,
     },
+    address: {
+      type: String,
+    },
   },
   {
     timestamps: true,
