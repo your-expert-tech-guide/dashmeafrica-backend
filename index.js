@@ -154,6 +154,34 @@ app.post('/api/getRate', async (req, res) => {
   }
 });
 
+// Endpoint to get shipment rates
+app.post('/api/get-shipment-rates', async (req, res) => {
+  const { type, toAddress, fromAddress, parcels, items } = req.body;
+
+  try {
+    const response = await axios.post(
+      'https://delivery-staging.apiideraos.com/api/v2/token/tariffs/allprice',
+      {
+        type,
+        toAddress,
+        fromAddress,
+        parcels,
+        items
+      },
+      {
+        headers: {
+          'Authorization': 'Bearer Secret Key',  // Replace with your actual API key
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    res.json(response.data);  // Send the shipment rates to the frontend
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Failed to fetch shipment rates' });
+  }
+});
 
 // Start Server
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
