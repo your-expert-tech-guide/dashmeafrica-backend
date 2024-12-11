@@ -17,7 +17,8 @@ cloudinary.config({
 });
 
 // Example: Protected Profile Route
-router.get('/profile', async (req, res) => {
+router.get('/profile', protect, async (req, res) => {
+  console.log(req.user)
   res.json(req.user);
 });
 
