@@ -9,9 +9,15 @@ const cloudinary = require('cloudinary').v2; // Ensure Cloudinary is properly co
 
 const upload = multer(); // Use memory storage for uploaded files.
 
+// Cloudinary Configuration (Make sure your .env file is set up)
+cloudinary.config({
+  cloud_name: "df2q6gyuq",
+  api_key: "259936754944698",
+  api_secret: "bTfV4_taJPd1zxxk1KJADTL8JdU",
+});
 
 // Example: Protected Profile Route
-router.get('/profile', protect, async (req, res) => {
+router.get('/profile', async (req, res) => {
   res.json(req.user);
 });
 
@@ -37,7 +43,15 @@ router.get('/profile', protect, async (req, res) => {
 
 router.put('/profile', protect, upload.single('image'), async (req, res) => {
   try {
-    const { fullName, lastName, username, email, address, bio } = req.body;
+    console.log('Request Body:', req.body);
+
+    const { fullName, username, email, address, bio } = req.body;
+
+    if (!fullName || !username || !email || !address || !bio) {
+      return res.status(400).json({ message: 'Please provide all required fields' });
+    }
+
+
     let profilePicture;
 
     // Handle image upload
@@ -66,7 +80,6 @@ router.put('/profile', protect, upload.single('image'), async (req, res) => {
 
     const updatedData = {
       fullName,
-      lastName,
       username,
       email,
       address,
@@ -76,6 +89,8 @@ router.put('/profile', protect, upload.single('image'), async (req, res) => {
     if (profilePicture) {
       updatedData.profilePicture = profilePicture; // Add image URL if uploaded.
     }
+
+    console.log(updatedData)
 
     const updatedUser = await User.findByIdAndUpdate(req.user._id, updatedData, { new: true });
     res.status(200).json(updatedUser);
