@@ -3,32 +3,87 @@ const router = express.Router();
 const { protect } = require('../middleware/authMiddleware');
 const ReservedAccount = require('../models/ReservedAccount');
 const User = require('../models/User');
+const multer = require('multer');
+const streamifier = require('streamifier');
+const cloudinary = require('cloudinary').v2; // Ensure Cloudinary is properly configured.
+
+const upload = multer(); // Use memory storage for uploaded files.
+
 
 // Example: Protected Profile Route
 router.get('/profile', protect, async (req, res) => {
   res.json(req.user);
 });
 
-router.put('/profile', protect, async (req, res) => {
+// router.put('/profile', protect, async (req, res) => {
+//   try {
+//     const { fullName, lastName, username, email, address, bio } = req.body;
+
+//     console.log(req.body)
+
+//     const updatedUser = await User.findByIdAndUpdate(
+//       req.user._id,
+//       { fullName: fullName, lastname: lastName, username, email, address, bio },
+//       { new: true }
+//     );
+
+//     console.log(updatedUser)
+//     res.status(200).json(updatedUser);
+//   } catch (error) {
+//     console.error('Error updating profile:', error.message);
+//     res.status(500).json({ message: 'Internal server error' });
+//   }
+// });
+
+router.put('/profile', protect, upload.single('image'), async (req, res) => {
   try {
     const { fullName, lastName, username, email, address, bio } = req.body;
+    let profilePicture;
 
-    console.log(req.body)
+    // Handle image upload
+    if (req.file) {
+      const uploadPromise = new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { resource_type: 'image' },
+          (error, result) => {
+            if (error) {
+              reject(error);
+            }
+            resolve(result);
+          }
+        );
+        streamifier.createReadStream(req.file.buffer).pipe(stream);
+      });
 
-    const updatedUser = await User.findByIdAndUpdate(
-      req.user._id,
-      { fullName: fullName, lastname: lastName, username, email, address, bio },
-      { new: true }
-    );
+      try {
+        const result = await uploadPromise;
+        profilePicture = result.secure_url; // Secure URL of the uploaded image.
+      } catch (error) {
+        console.error('Image upload failed:', error.message);
+        return res.status(500).json({ message: 'Image upload failed', error: error.message });
+      }
+    }
 
-    console.log(updatedUser)
+    const updatedData = {
+      fullName,
+      lastName,
+      username,
+      email,
+      address,
+      bio,
+    };
+
+    if (profilePicture) {
+      updatedData.profilePicture = profilePicture; // Add image URL if uploaded.
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(req.user._id, updatedData, { new: true });
     res.status(200).json(updatedUser);
   } catch (error) {
     console.error('Error updating profile:', error.message);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
-
 
 // Endpoint to get user details along with their reserved account details
 router.get('/userAccountDetails', protect, async (req, res) => {
