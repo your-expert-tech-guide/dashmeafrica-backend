@@ -98,6 +98,4 @@ const productSchema = mongoose.Schema(
 
 const Product = mongoose.model("Product", productSchema);
 
-Product.update({}, { $set });
-
 module.exports = Product;

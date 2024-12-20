@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Product = require("../models/Product");
 const multer = require("multer");
+const { uploadSingle, uploadMultiple } = require("../helpers");
 const cloudinary = require("cloudinary").v2;
 
 // Cloudinary Configuration (Make sure your .env file is set up)
@@ -44,7 +45,7 @@ router.post(
 
 		console.log(uploader);
 
-		if (!title || !category || !price || !uploader) {
+		if (!title || !category || !price || !uploader || !image) {
 			return res.status(400).json({
 				message:
 					"Please fill all required fields, provide an image, and include uploader information",
@@ -54,6 +55,7 @@ router.post(
 		try {
 			// Upload image to Cloudinary
 			let imageUrl = "";
+			let featureImagesUrl = [];
 			if (req.file) {
 				const uploadPromise = new Promise((resolve, reject) => {
 					const stream = cloudinary.uploader.upload_stream(
@@ -70,8 +72,12 @@ router.post(
 				});
 
 				try {
-					const result = await uploadPromise;
+					const result = await uploadSingle(image);
 					imageUrl = result.secure_url;
+					if (!!featureImages.length) {
+						const [urls, result] = await uploadMultiple(featureImages);
+						featureImagesUrl = urls;
+					}
 				} catch (error) {
 					console.error(error);
 					return res
@@ -80,6 +86,10 @@ router.post(
 				}
 			}
 
+			console.log({ image: imageUrl, featureImages: featureImagesUrl });
+
+			return;
+
 			const product = new Product({
 				title,
 				description,
@@ -87,6 +97,7 @@ router.post(
 				price,
 				priceCategory,
 				image: imageUrl,
+				featureImages: featureImagesUrl,
 				location,
 				tag: "sell", // Explicitly set the tag to "sell"
 				uploader, // Add the uploader ID
