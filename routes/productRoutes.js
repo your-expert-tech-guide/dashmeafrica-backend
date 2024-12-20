@@ -26,9 +26,9 @@ router.post(
 		{ name: "featureImages", maxCount: 10 },
 	]),
 	async (req, res) => {
-		console.log("Form data received:", req.body);
-		// console.log("Uploaded file:", req.file);
-		console.log("Uploaded files:", req.files);
+		// console.log("Form data received:", req.body);
+		// // console.log("Uploaded file:", req.file);
+		// console.log("Uploaded files:", req.files);
 
 		const image = req.files.image[0];
 		const featureImages = req.files.featureImages;
@@ -43,7 +43,7 @@ router.post(
 			uploader,
 		} = req.body;
 
-		console.log(uploader);
+		// console.log(uploader);
 
 		if (!title || !category || !price || !uploader || !image) {
 			return res.status(400).json({
@@ -56,7 +56,7 @@ router.post(
 			// Upload image to Cloudinary
 			let imageUrl = "";
 			let featureImagesUrl = [];
-			if (req.file) {
+			if (image) {
 				const uploadPromise = new Promise((resolve, reject) => {
 					const stream = cloudinary.uploader.upload_stream(
 						{ resource_type: "image" },
@@ -68,11 +68,11 @@ router.post(
 						}
 					);
 
-					require("streamifier").createReadStream(req.file.buffer).pipe(stream);
+					require("streamifier").createReadStream(image.buffer).pipe(stream);
 				});
 
 				try {
-					const result = await uploadSingle(image);
+					const result = await uploadPromise;
 					imageUrl = result.secure_url;
 					if (!!featureImages.length) {
 						const [urls, result] = await uploadMultiple(featureImages);
@@ -86,9 +86,7 @@ router.post(
 				}
 			}
 
-			console.log({ image: imageUrl, featureImages: featureImagesUrl });
-
-			return;
+			// console.log({ image: imageUrl, featureImages: featureImagesUrl });
 
 			const product = new Product({
 				title,

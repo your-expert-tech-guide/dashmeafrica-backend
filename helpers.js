@@ -1,9 +1,11 @@
+const cloudinary = require("cloudinary").v2;
+
 /**
  *
  * @param {File} file
  * @returns {}
  */
-export async function uploadSingle(file) {
+async function uploadSingle(file) {
 	const uploadPromise = new Promise((resolve, reject) => {
 		const stream = cloudinary.uploader.upload_stream(
 			{ resource_type: "image" },
@@ -26,7 +28,7 @@ export async function uploadSingle(file) {
  * @param {File[]} files
  * @returns {Promise<[string[],import("cloudinary").UploadApiResponse[]]>}
  */
-export async function uploadMultiple(files) {
+async function uploadMultiple(files) {
 	// for each uploadSingle
 
 	const uploadPromises = files.map(async (file) => {
@@ -38,3 +40,5 @@ export async function uploadMultiple(files) {
 
 	return [cloudinaryUrls, cloudinaryResult];
 }
+
+module.exports = { uploadMultiple, uploadSingle };
