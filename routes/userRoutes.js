@@ -153,7 +153,7 @@ router.post("/login", async (req, res) => {
 	}
 
 	try {
-		const user = await await { email };
+		const user = await User.findOne({ email });
 
 		// Check if user exists and compare passwords
 		if (!user || !(await bcrypt.compare(password, user.password))) {
